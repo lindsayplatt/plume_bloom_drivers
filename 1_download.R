@@ -176,5 +176,7 @@ p1_download <- list(
   # Could not get this to branch over the `format='file'` without making this a pattern and 
   # I want to collapse the list, so adding a hash column instead.
   tar_target(p1_hs_sedclass_tif_info, tibble(tif_fn = unname(p1_hs_sedclass_tifs)) %>% 
-               mutate(tif_fn_hash = tools::md5sum(tif_fn)))
+               mutate(tif_fn_hash = tools::md5sum(tif_fn)) %>% 
+               # Filter out directories listed here (they won't have a hash)
+               filter(!is.na(tif_fn_hash)))
 )
