@@ -1,15 +1,15 @@
 
-# Per file, convert class values 0 thru 4 to sediment 
-# binary value (sediment classes are 2 thru 4 and would become 1)
+# Per file, combine class values 3 thru 5 to sediment 
+# binary value (sediment classes are 3 thru 5 and would become 3)
 classified_raster_to_sed_presence <- function(in_file, out_file) {
   
   # Load the tif file
   rast_by_class <- terra::rast(in_file)
   
-  # if(nrow(terra::freq(rast_by_class)) > 1) browser()
+  # if(nrow(terra::freq(rast_by_class)) == 5) browser()
   
-  # Convert from classes 0:4 to sediment/not sediment binary
-  rast_sed_bin <- subst(subst(rast_by_class, from=1, to=0), from=2:4, to=1)
+  # Convert from classes 0:5 to collapse sediment types to just "sediment"
+  rast_sed_bin <- subst(rast_by_class, from=3:5, to=3)
   
   save_terraqs(rast_sed_bin, out_file)
   return(out_file)
