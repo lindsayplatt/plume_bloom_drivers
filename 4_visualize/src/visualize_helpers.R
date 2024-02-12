@@ -54,3 +54,18 @@ make_sediment_ts <- function(sediment_ts_byOutlet) {
     ggtitle('Boxplots per year per mission for daily % sediment')
 }
 
+map_outlets <- function() {
+  river_outlet_sf_list <- tar_read(p2_outlet_list_sf)
+  lake_sf <- tar_read(p2_lake_superior_watershed_dissolved)
+  
+  common_crs <- 'epsg:4326'
+  
+  river_outlets_sf <- river_outlet_sf_list %>% bind_rows() %>% st_transform(crs=common_crs)
+  lake_sup_ws <- st_transform(lake_sf, crs=common_crs)
+  
+  ggplot() +
+    geom_sf(data = lake_sup_ws, fill = '#9ba68e', color = NA) +
+    geom_sf(data = river_outlets_sf, aes(color = river), fill=NA, linewidth=2) +
+    theme_void()
+  
+}
