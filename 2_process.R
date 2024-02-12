@@ -64,7 +64,7 @@ p2_process <- list(
                                 p2_sediment_heatmap_landsat_batch_terraqs)))),
              format='file'),
   
-  # Summarize the sediment presence as a time series per outlet polygon)
+  # Summarize the sediment presence as a time series per outlet polygon
   tar_target(p2_sediment_crs, terra::crs(load_terraqs(p2_sedpresence_terraqs[1]))),
   tar_target(p2_outlet_list_sf, 
              create_bbox_sf(p1_river_outlet_bbox_tbl, crs=p2_sediment_crs),
