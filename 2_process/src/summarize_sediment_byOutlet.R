@@ -26,49 +26,68 @@ parse_tif_fn <- function(fn) {
   return(c(date = sed_date, mission = mission_nm))
 }
 
-summarize_outlet_sed_freq <- function(sed_data, mission_nm, sed_date, outlet_poly, outlet_id) {
+summarize_poly_raster_freq <- function(raster_data, mission_nm, raster_date, poly_sf = NULL, poly_id = NULL) {
   
   # Drop any names attributes leftover from `parse_tif_fn()`
   mission_nm <- unname(mission_nm)
-  sed_date <- unname(sed_date)
+  raster_date <- unname(raster_date)
   
-  # First crop to just this outlet's polygon
-  sed_data_outlet <- crop(sed_data, outlet_poly)
+  # First crop to just a specific polygon if specified
+  if(!is.null(poly_sf)) {
+    raster_data <- crop(raster_data, poly_sf)
+  }
   
   # Now count up the total number of cells & the number with different classes present
-  n_cells_out <- terra::freq(sed_data_outlet, value = 0)$count
-  n_cells_cloud <- terra::freq(sed_data_outlet, value = 1)$count
-  n_cells_water <- terra::freq(sed_data_outlet, value = 2)$count
-  n_cells_sed <- terra::freq(sed_data_outlet, value = 3)$count
-  n_cells_total <- ncell(sed_data_outlet)
+  n_cells_out <- terra::freq(raster_data, value = 0)$count
+  n_cells_cloud <- terra::freq(raster_data, value = 1)$count
+  n_cells_water <- terra::freq(raster_data, value = 2)$count
+  n_cells_sed <- terra::freq(raster_data, value = 3)$count
+  n_cells_total <- ncell(raster_data)
   
   # Summarize the results in a table to be combined with other outlets, 
   # dates, and missions.
-  tibble(
+  out_data <- tibble(
     mission = mission_nm,
-    date = sed_date,
-    river_outlet = outlet_id,
-    outsideAOI_outlet_pct = round(n_cells_out/n_cells_total*100, digits=3),
-    cloud_outlet_pct = round(n_cells_cloud/n_cells_total*100, digits=3),
-    openwater_outlet_pct = round(n_cells_water/n_cells_total*100, digits=3),
-    sediment_outlet_pct = round(n_cells_sed/n_cells_total*100, digits=3)
+    date = raster_date,
+    outsideAOI_pct = round(n_cells_out/n_cells_total*100, digits=3),
+    cloud_pct = round(n_cells_cloud/n_cells_total*100, digits=3),
+    openwater_pct = round(n_cells_water/n_cells_total*100, digits=3),
+    sediment_pct = round(n_cells_sed/n_cells_total*100, digits=3)
   )
+  
+  if(!is.null(poly_sf)) {
+    out_data <- mutate(out_data, poly_nm = poly_id, .after = date)
+  }
+  
+  return(out_data)
+}
+
+# Per file, summarize the raster classes for each outlet in a single table.
+summarize_class_pct_byOutlet <- function(in_file, outlet_sf_list) {
+  
+  file_info <- parse_tif_fn(in_file)
+  raster_data <- load_terraqs(in_file)
+  
+  outlet_sf_list %>% 
+    map(~summarize_poly_raster_freq(
+      raster_data = raster_data, 
+      mission_nm = file_info['mission'], 
+      raster_date = file_info['date'], 
+      poly_sf = .x, 
+      poly_id = .x$river)) %>% 
+    bind_rows()
   
 }
 
-# Per file, summarize the info
-summarize_sed_pct_byOutlet <- function(in_file, outlet_sf_list) {
+# Per file, summarize the raster classes for each outlet in a single table.
+summarize_class_pct_overall <- function(in_file) {
   
   file_info <- parse_tif_fn(in_file)
-  sed_data <- load_terraqs(in_file)
+  raster_data <- load_terraqs(in_file)
   
-  outlet_sf_list %>% 
-    map(~summarize_outlet_sed_freq(
-      sed_data, 
-      file_info['mission'], 
-      file_info['date'], 
-      outlet_poly = .x, 
-      outlet_id = .x$river)) %>% 
-    bind_rows()
+  summarize_poly_raster_freq(
+    raster_data = raster_data, 
+    mission_nm = file_info['mission'], 
+    raster_date = file_info['date']) 
   
 }

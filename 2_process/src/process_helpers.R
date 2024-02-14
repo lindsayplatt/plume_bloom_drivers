@@ -1,7 +1,7 @@
 
 # Per file, combine class values 3 thru 5 to sediment 
 # binary value (sediment classes are 3 thru 5 and would become 3)
-classified_raster_to_sed_presence <- function(in_file, out_file) {
+combine_raster_sed_classes <- function(in_file, out_file) {
   
   # Load the tif file
   rast_by_class <- terra::rast(in_file)

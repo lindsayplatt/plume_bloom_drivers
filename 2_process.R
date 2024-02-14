@@ -7,25 +7,31 @@ p2_process <- list(
   ##### Process classified tifs from HydroShare #####
   
   # Convert classified rasters to binary - 0 for not a sediment class, 1 for sediment class
-  tar_target(p2_sedpresence_terraqs, {
-    classified_raster_to_sed_presence(
+  # TODO: RENAME THIS BECAUSE WE ARE JUST COLLAPSING SEDIMENT BUT KEEEPING ALL OTHER CLASSES
+  tar_target(p2_combinedsed_terraqs, {
+    combine_raster_sed_classes(
       in_file = p1_hs_sedclass_tif_info$tif_fn,
       out_file = sprintf('2_process/tmp/%s', gsub('.tif', '.qs', basename(p1_hs_sedclass_tif_info$tif_fn))))
   },
     pattern = map(p1_hs_sedclass_tif_info), 
     format = 'file'),
   
-  # Summarize the sediment presence as a time series per outlet polygon
-  tar_target(p2_sediment_crs, terra::crs(load_terraqs(p2_sedpresence_terraqs[1]))),
+  # Summarize all raster classes as a time series for the full AOI
+  tar_target(p2_classification_summary_overall,
+             summarize_class_pct_overall(p2_combinedsed_terraqs),
+             pattern = map(p2_combinedsed_terraqs)),
+  
+  # Summarize all raster classes as a time series per outlet polygon
+  tar_target(p2_sediment_crs, terra::crs(load_terraqs(p2_combinedsed_terraqs[1]))),
   tar_target(p2_outlet_list_sf, 
              create_bbox_sf(p1_river_outlet_bbox_tbl, crs=p2_sediment_crs),
              pattern = map(p1_river_outlet_bbox_tbl),
              iteration = 'list'),
-  tar_target(p2_sediment_presence_summary_byOutlet,
-             summarize_sed_pct_byOutlet(p2_sedpresence_terraqs, p2_outlet_list_sf),
-             pattern = p2_sedpresence_terraqs),
-  tar_target(p2_sediment_presence_summary_byOutlet_ready,
-             p2_sediment_presence_summary_byOutlet %>% 
+  tar_target(p2_classification_summary_byOutlet,
+             summarize_class_pct_byOutlet(p2_combinedsed_terraqs, p2_outlet_list_sf),
+             pattern = map(p2_combinedsed_terraqs)),
+  tar_target(p2_classification_summary_byOutlet_ready,
+             p2_classification_summary_byOutlet %>% 
                mutate(date= as.Date(date),
                      year = year(date),
                      year_mission = sprintf('%s_%s', year, mission),
