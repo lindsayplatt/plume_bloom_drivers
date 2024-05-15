@@ -30,12 +30,12 @@ make_sediment_heatmap <- function(in_file, out_file, mission, lake_sf) {
 }
 
 make_sediment_ts <- function(sediment_ts_byOutlet) {
-  # ggplot(sediment_ts_byOutlet, 
-  #        aes(x = as.Date(date), 
-  #            y = sediment_outlet_pct,
+  # ggplot(sediment_ts_byOutlet,
+  #        aes(x = as.Date(date),
+  #            y = sediment_pct,
   #            color = mission)) +
   #   geom_point() +
-  #   facet_grid(river_outlet ~ .) +
+  #   facet_grid(season ~ river_outlet) +
   #   ylab('Percent of river outlet with sediment') +
   #   xlab('Date') +
   #   ggtitle('Time series summary of % sediment per river outlet',
@@ -44,7 +44,7 @@ make_sediment_ts <- function(sediment_ts_byOutlet) {
   #   theme(strip.text.y = element_text(angle = 0))
   
   ggplot(sediment_ts_byOutlet,
-         aes(y=sediment_outlet_pct, x=year, group=year_mission, 
+         aes(y=sediment_pct, x=year, group=year_mission,
              fill=mission, color=mission)) +
     geom_boxplot(position = position_dodge(preserve = "single")) +
     facet_grid(river_outlet ~ .) +

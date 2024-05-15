@@ -74,6 +74,6 @@ p4_visualize <- list(
              format='file'),
   
   tar_target(p4_sediment_presence_ts_ggplot, 
-             make_sediment_ts(p2_sediment_presence_summary_byOutlet))
+             make_sediment_ts(p2_sediment_presence_summary_byOutlet_ready))
   
 )

@@ -37,7 +37,24 @@ p2_process <- list(
                      year = year(date),
                      year_mission = sprintf('%s_%s', year, mission),
                      season = ordered(month_to_season(month(date)), 
-                                      levels = c('Winter', 'Spring', 'Summer', 'Fall')))),
+                                      levels = c('Winter', 'Spring', 'Summer', 'Fall'))) %>% 
+               select(mission, date, 
+                      river_outlet = poly_nm, 
+                      year, year_mission, season,
+                      everything())),
+  
+  # Save the classifications as timeseries for the overall AOI and individual outlets
+  # THIS IS WHAT I UPLOAD TO BOX AND SHARE WITH HILARY
+  tar_target(p2_classification_summary_overall_csv, {
+    out_file <- '2_process/out/classifications_pct_overall.csv'
+    write_csv(p2_classification_summary_overall, out_file)
+    return(out_file)
+  }, format = 'file'),
+  tar_target(p2_classification_summary_byOutlet_csv, {
+    out_file <- '2_process/out/classifications_pct_by_outlet.csv'
+    write_csv(p2_classification_summary_byOutlet_ready, out_file)
+    return(out_file)
+  }, format = 'file'),
   
   ##### Load and process observed blooms spreadsheet #####
   
