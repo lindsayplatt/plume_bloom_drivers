@@ -27,16 +27,14 @@ source('4_visualize.R')
 
 # Define what each value in the rasters mean
 bloom_plume_class_xwalk <- tibble::tibble(
-  val = 0:5,
+  val = 0:3,
   nm = c(
     "outsideAOI",
     "cloud",
     "openWater",
-    "lightNearShoreSediment",
-    "darkNearShoreSediment",
-    "offShoreSediment"
+    "sediment"
   ),
-  color = c("white", "grey", "#9fc5e8", "#edbd95", "#41240c", "#db7b2b")
+  color = c("white", "grey", "#9fc5e8", "#41240c")
 )
 
 # All outputs

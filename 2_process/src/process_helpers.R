@@ -1,17 +1,7 @@
 
-# Per file, combine class values 3 thru 5 to sediment 
-# binary value (sediment classes are 3 thru 5 and would become 3)
-combine_raster_sed_classes <- function(in_file, out_file) {
-  
-  # Load the tif file
-  rast_by_class <- terra::rast(in_file)
-  
-  # if(nrow(terra::freq(rast_by_class)) == 5) browser()
-  
-  # Convert from classes 0:5 to collapse sediment types to just "sediment"
-  rast_sed_bin <- subst(rast_by_class, from=3:5, to=3)
-  
-  save_terraqs(rast_sed_bin, out_file)
+# Per tif file, load and save the raster as a terra object (qs file)
+save_as_terra <- function(in_file, out_file) {
+  save_terraqs(terra::rast(in_file), out_file)
   return(out_file)
 }
 
